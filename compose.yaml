@@ -1,0 +1,23 @@
+﻿services:
+  langgonew:
+    image: langgonew
+    build:
+      context: .
+      dockerfile: LanggoNew/Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./LanggoNew/.env
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: langgo_admin
+      POSTGRES_DB: langgo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
