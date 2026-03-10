@@ -4,7 +4,7 @@ public class Game
 {
     public int Id { get; set; }
     public int DictionaryId { get; set; }
-    public string Mode { get; set; } = string.Empty;
+    public string? Mode { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public int? WinnerId { get; set; }
     public int RoundsCount { get; set; }

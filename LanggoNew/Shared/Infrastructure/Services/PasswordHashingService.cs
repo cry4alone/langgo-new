@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace LanggoNew.Shared.Infrastructure.PasswordHashing;
+namespace LanggoNew.Shared.Infrastructure.Services;
 
 public interface IPasswordHashingService
 {

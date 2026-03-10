@@ -5,7 +5,7 @@ using LanggoNew;
 using LanggoNew.Endpoints;
 using LanggoNew.Features.Dictionaries;
 using LanggoNew.Middleware;
-using LanggoNew.Shared.Infrastructure.PasswordHashing;
+using LanggoNew.Shared.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -42,13 +42,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddStackExchangeRedisCache(options => 
+    options.Configuration = builder.Configuration.GetConnectionString("Redis"));
+
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddAutoMapper(cfg =>
 {
+    cfg.LicenseKey = builder.Configuration["AutoMapper:LicenseKey"];
 }, typeof(DictionaryProfile));
+builder.Services.AddMediatR(config => config.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
@@ -71,6 +77,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
+builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
 builder.Services.AddEndpoints();
 

@@ -1,4 +1,6 @@
 using FluentValidation;
+using LanggoNew.Features.Authentication.Authenticate;
+using LanggoNew.Features.Authentication.Register;
 using LanggoNew.Shared.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,8 @@ public class GlobalExceptionHandler : IExceptionHandler
             ValidationException => StatusCodes.Status400BadRequest,
             NotFoundException or KeyNotFoundException => StatusCodes.Status404NotFound,
             ConflictException => StatusCodes.Status409Conflict,
-            InvalidCredentialsException => StatusCodes.Status401Unauthorized,
+            InvalidCredentialsException or AuthenticationFailedException => StatusCodes.Status401Unauthorized,
+            EmailAlreadyInUseException => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
         };
 
