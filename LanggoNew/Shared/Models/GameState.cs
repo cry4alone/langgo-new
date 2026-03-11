@@ -7,8 +7,8 @@ public class GameState
     public string RoomId { get; set; } = string.Empty;
     public int GameId { get; set; }
     public string HostUserId { get; set; } = string.Empty;
-    
-    public List<int> PlayerUserIds { get; set; } = [];
+
+    public List<int> PlayerUserIds { get; set; } = new List<int>();
     public int MaxRounds { get; set; } = 15;
     public GameStatus Status { get; set; } = GameStatus.Waiting;
 

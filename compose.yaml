@@ -20,8 +20,20 @@
       - postgres_data:/var/lib/postgresql/data
   redis:
     image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
     ports:
       - "6379:6379"
+  redisinsight:
+    image: redis/redisinsight:3.2.0-arm64
+    restart: always
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/db
 
 volumes:
   postgres_data:
+  redis_data:
+  redisinsight_data:

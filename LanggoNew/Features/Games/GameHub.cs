@@ -1,3 +1,4 @@
+using LanggoNew.Features.Games.JoinGame;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -5,16 +6,24 @@ namespace LanggoNew.Features.Games;
 
 public class GameHub(ISender sender) : Hub
 {
-    public async Task JoinRoom(string roomId, string userName)
+    public async Task JoinRoom(string roomId, int userId)
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{userName} has joined the room.");
+        
+        var command = new JoinGame.Command(roomId, userId);
+        await sender.Send(command);
+        
+        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{userId} has joined the room.");
     }
     
-    public async Task LeaveRoom(string roomName, string userName)
+    public async Task LeaveRoom(string roomId, int userId)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
-        await Clients.Group(roomName).SendAsync("ReceiveMessage", $"{userName} has left the room {roomName}.");
+        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{userId} has left the room");
+        
+        var command = new LeaveGame.Command(userId, roomId);
+        await sender.Send(command);
+        
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
     }
     
     public async Task StartGame(string roomName)

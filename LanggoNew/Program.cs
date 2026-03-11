@@ -4,11 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using LanggoNew;
 using LanggoNew.Endpoints;
 using LanggoNew.Features.Dictionaries;
+using LanggoNew.Features.Games;
 using LanggoNew.Middleware;
+using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,9 +45,26 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddStackExchangeRedisCache(options => 
-    options.Configuration = builder.Configuration.GetConnectionString("Redis"));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.WithOrigins(
+                "http://localhost:5500",
+                "http://127.0.0.1:5500"
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration = builder.Configuration.GetConnectionString("Redis");
+    return ConnectionMultiplexer.Connect(configuration);
+});
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -76,8 +96,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddSignalR();
+
 builder.Services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IRedisCache, RedisCache>();
 
 builder.Services.AddEndpoints();
 
@@ -91,11 +115,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAll");
 app.UseExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<GameHub>("/game");
 app.MapEndpoints();
 
 app.Run();

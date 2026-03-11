@@ -2,13 +2,15 @@ using System.Security.Claims;
 using LanggoNew.Models;
 using LanggoNew.Shared.Enum;
 using LanggoNew.Shared.Infrastructure;
+using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace LanggoNew.Features.Games.CreateGame;
 
-public class Handler(IRedisCache cache, AppDbContext context, HttpContext httpContext) : IRequestHandler<Command, Response>
+public class Handler(AppDbContext context, ICurrentUserService currentUserService, IRedisCache cache) : IRequestHandler<Command, Response>
 {
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
@@ -27,7 +29,7 @@ public class Handler(IRedisCache cache, AppDbContext context, HttpContext httpCo
         context.Games.Add(newGame);
         await context.SaveChangesAsync(cancellationToken);
 
-        var currentUserId = httpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+        var currentUserId = currentUserService.GetCurrentUserId();
         
         var gameState = new GameState
         {
@@ -39,8 +41,7 @@ public class Handler(IRedisCache cache, AppDbContext context, HttpContext httpCo
         };
         await cache.SetDataAsync(
             $"game:{gameState.RoomId}",
-            gameState,
-            TimeSpan.FromHours(1));
+            gameState);
 
         return new Response(gameState.RoomId);
     }

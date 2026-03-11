@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  langgonew:
+    build:
+      context: "/Users/andrei/projects/LanggoNew"
+      dockerfile: "LanggoNew/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/LanggoNew.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "langgonew:dev"
+    ports: []
+    volumes:
+    - "/Users/andrei/projects/LanggoNew/LanggoNew:/app:rw"
+    - "/Users/andrei/projects/LanggoNew:/src:rw"
+    - "/Users/andrei/.microsoft/usersecrets:/home/app/.microsoft/usersecrets"
+    - "/Users/andrei/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"
