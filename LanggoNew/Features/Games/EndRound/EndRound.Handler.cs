@@ -4,21 +4,23 @@ using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 
 namespace LanggoNew.Features.Games.EndRound;
 
-public record Command(string RoomId) : IRequest<Response>;
+public record Command(string RoomId) : IRequest;
 public record Response(int? WinnerId, Dictionary<int, int> Scores, DateTime NewRoundTime);
 
 public class Handler(
     IRedisCache cache,
     IGameTimerService timerService,
-    IOptions<GameTimingOptions> timingOptions) : IRequestHandler<Command, Response>
+    IOptions<GameTimingOptions> timingOptions,
+    IHubContext<GameHub> hubContext) : IRequestHandler<Command>
 {
-    public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
+    public async Task Handle(Command request, CancellationToken cancellationToken)
     {
-        return await cache.ExecuteWithLockAsync(request.RoomId, async gameKey =>
+        await cache.ExecuteWithLockAsync(request.RoomId, async gameKey =>
         {
             var currentGameState = await cache.GetDataAsync<GameState>(gameKey)
                 ?? throw new NotFoundException($"Game state not found for room '{request.RoomId}'");
@@ -30,10 +32,7 @@ public class Handler(
 
             if (currentGameState.LastEndedRound == currentGameState.CurrentRound)
             {
-                return new Response(
-                    winnerId,
-                    scores,
-                    currentGameState.CurrentJobEndTimeUtc ?? DateTime.UtcNow);
+                return;
             }
 
             await timerService.CancelJob(currentGameState.CurrentJobId);
@@ -46,8 +45,12 @@ public class Handler(
             currentGameState.CurrentJobEndTimeUtc = newRoundTime;
 
             await cache.SetDataAsync(gameKey, currentGameState);
-
-            return new Response(winnerId, scores, newRoundTime);
+            
+            await hubContext.Clients.Group(request.RoomId).SendAsync("EndRound",
+                new Response(winnerId,
+                    scores,
+                    newRoundTime),
+                cancellationToken);
         });
     }
 }

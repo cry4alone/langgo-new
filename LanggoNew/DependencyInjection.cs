@@ -1,4 +1,6 @@
 using System.Text;
+using Hangfire;
+using Hangfire.Redis.StackExchange;
 using LanggoNew.Features.Dictionaries;
 using LanggoNew.Shared.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -133,6 +135,23 @@ public static class DependencyInjection
     public static IServiceCollection AddGameTimingOptions(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<GameTimingOptions>(configuration.GetSection("GameTiming"));
+        return services;
+    }
+    
+    public static IServiceCollection AddHangfireAndHangfireServer(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHangfire(config => config
+            .UseRedisStorage(configuration.GetConnectionString("Redis"), new RedisStorageOptions
+            {
+                Prefix = "hangfire:", 
+            })
+        );
+        
+        services.AddHangfireServer(options =>
+        {
+            options.SchedulePollingInterval = TimeSpan.FromSeconds(1);
+        });
+        
         return services;
     }
 }

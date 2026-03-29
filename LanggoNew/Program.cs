@@ -19,6 +19,7 @@ builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddAutoMapperConfig(builder.Configuration);
 builder.Services.AddMediatRConfig(builder.Configuration);
+builder.Services.AddHangfireAndHangfireServer(builder.Configuration);
 builder.Services.AddSignalR();
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddGameTimingOptions(builder.Configuration);
@@ -31,6 +32,7 @@ builder.Services.AddJwt(builder.Configuration);
 
 builder.Services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddSingleton<IGameTimerService, GameTimerService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IRedisCache, RedisCache>();
 builder.Services.AddScoped<IWordService, WordService>();

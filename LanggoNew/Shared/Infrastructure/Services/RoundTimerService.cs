@@ -15,7 +15,7 @@ public interface IGameTimerService
     Task CancelJob(string? jobId);
 }
 
-public class RoundTimerService(IBackgroundJobClient backgroundJobClient, IOptions<GameTimingOptions> timingOptions) : IGameTimerService
+public class GameTimerService(IBackgroundJobClient backgroundJobClient, IOptions<GameTimingOptions> timingOptions) : IGameTimerService
 {
     public Task<string> ScheduleEndRound(string roomId)
     {
@@ -45,7 +45,7 @@ public class RoundTimerService(IBackgroundJobClient backgroundJobClient, IOption
     }
 }
 
-public abstract class EndRoundByTimerJob(ISender sender)
+public class EndRoundByTimerJob(ISender sender)
 {
     public async Task Execute(string roomId)
     {
@@ -53,7 +53,7 @@ public abstract class EndRoundByTimerJob(ISender sender)
     }
 }
 
-public abstract class StartNewRoundByTimerJob(ISender sender)
+public class StartNewRoundByTimerJob(ISender sender)
 {
     public async Task Execute(string roomId)
     {

@@ -33,7 +33,7 @@ public class GameHub(ISender sender) : Hub
         var command = new StartGame.Command(roomId);
         var response = await sender.Send(command);
         
-        await Clients.Group(roomId).SendAsync("GameStarted", response.CurrentWord);
+        await Clients.Group(roomId).SendAsync("GameStarted", response.GameStartTime);
     }
 
     public async Task SubmitAnswer(string roomId, string answer)
