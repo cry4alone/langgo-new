@@ -1,6 +1,7 @@
 using FluentValidation;
 using LanggoNew.Features.Authentication.Authenticate;
 using LanggoNew.Features.Authentication.Register;
+using LanggoNew.Features.Games.CreateGame;
 using LanggoNew.Shared.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             ConflictException => StatusCodes.Status409Conflict,
             InvalidCredentialsException or AuthenticationFailedException => StatusCodes.Status401Unauthorized,
             EmailAlreadyInUseException => StatusCodes.Status409Conflict,
+            NotEnoughWordsInDictionaryException => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status500InternalServerError
         };
 

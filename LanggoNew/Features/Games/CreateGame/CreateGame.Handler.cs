@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using LanggoNew.Models;
 using LanggoNew.Shared.Enum;
 using LanggoNew.Shared.Infrastructure;
@@ -6,11 +5,14 @@ using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
 
 namespace LanggoNew.Features.Games.CreateGame;
 
-public class Handler(AppDbContext context, ICurrentUserService currentUserService, IRedisCache cache) : IRequestHandler<Command, Response>
+public class Handler(
+    AppDbContext context,
+    ICurrentUserService currentUserService,
+    IRedisCache cache,
+    IWordService wordService) : IRequestHandler<Command, Response>
 {
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
@@ -31,12 +33,21 @@ public class Handler(AppDbContext context, ICurrentUserService currentUserServic
 
         var currentUserId = currentUserService.GetCurrentUserId();
         
+        var words = await wordService.GetRandomWordsFromDictionary(
+            request.MaxRounds,
+            request.DictionaryId);
+        
+        if(words.Count < request.MaxRounds)
+            throw new NotEnoughWordsInDictionaryException(request.DictionaryId, request.MaxRounds);
+        
         var gameState = new GameState
         {
             RoomId = Guid.NewGuid().ToString(),
             GameId = newGame.Id,
+            DictionaryId = request.DictionaryId,
+            GameWords = words,
             HostUserId = currentUserId,
-            PlayerUserIds = [int.Parse(currentUserId)],
+            PlayerUserIds = [],
             MaxRounds = request.MaxRounds,
         };
         await cache.SetDataAsync(
@@ -45,4 +56,5 @@ public class Handler(AppDbContext context, ICurrentUserService currentUserServic
 
         return new Response(gameState.RoomId);
     }
+
 }

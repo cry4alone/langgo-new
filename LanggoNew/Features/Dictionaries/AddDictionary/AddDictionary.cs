@@ -3,6 +3,7 @@ using AutoMapper;
 using FluentValidation;
 using LanggoNew.Endpoints;
 using LanggoNew.Models;
+using LanggoNew.Shared.Enum;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace LanggoNew.Features.Dictionaries.AddDictionary;
@@ -11,8 +12,8 @@ public static class AddDictionary
 {
     public record Request(
         string Name, 
-        string LangFrom, 
-        string LangTo,
+        LanguageCode LangFrom, 
+        LanguageCode LangTo,
         string Description,
         bool IsPublic);
 

@@ -22,7 +22,7 @@ public class Handler(AppDbContext context, IPasswordHashingService passwordHashi
         if (!isPasswordValid) throw new AuthenticationFailedException();
              
         var token = jwtTokenGenerator.GenerateJwtToken(user);
-             
+        
         return new Response(token);
     }
 }

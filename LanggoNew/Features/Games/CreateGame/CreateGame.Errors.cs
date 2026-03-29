@@ -6,3 +6,11 @@ public class DictionaryNotFoundException : Exception
     {
     }
 }
+
+public class NotEnoughWordsInDictionaryException : Exception
+{
+    public NotEnoughWordsInDictionaryException(int dictionaryId, int requiredWords) 
+        : base($"Dictionary with ID {dictionaryId} does not contain enough words. Required: {requiredWords}.")
+    {
+    }
+}

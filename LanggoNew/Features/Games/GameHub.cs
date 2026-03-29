@@ -1,52 +1,53 @@
-using LanggoNew.Features.Games.JoinGame;
+using LanggoNew.Features.Games.StartNewRound;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace LanggoNew.Features.Games;
 
+[Authorize]
 public class GameHub(ISender sender) : Hub
 {
-    public async Task JoinRoom(string roomId, int userId)
+    public async Task JoinRoom(string roomId)
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
         
-        var command = new JoinGame.Command(roomId, userId);
+        var command = new JoinGame.Command(roomId);
         await sender.Send(command);
         
-        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{userId} has joined the room.");
+        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{Context.ConnectionId} has joined the room.");
     }
     
-    public async Task LeaveRoom(string roomId, int userId)
+    public async Task LeaveRoom(string roomId)
     {
-        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{userId} has left the room");
+        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{Context.ConnectionId} has left the room");
         
-        var command = new LeaveGame.Command(userId, roomId);
+        var command = new LeaveGame.Command(roomId);
         await sender.Send(command);
         
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
     }
     
-    public async Task StartGame(string roomName)
-    {
-        await Clients.Group(roomName).SendAsync("StartGame", $"The game in room {roomName} is starting!");
+    public async Task StartGame(string roomId)
+    {        
+        var command = new StartGame.Command(roomId);
+        var response = await sender.Send(command);
+        
+        await Clients.Group(roomId).SendAsync("GameStarted", response.CurrentWord);
     }
 
-    public async Task SubmitAnswer(string userName, string roomName, string answer)
+    public async Task SubmitAnswer(string roomId, string answer)
     {
-        var isCorrect = false;  //go to GameService to check if the answer is correct and update the score
-        await Clients.Caller.SendAsync("ReceiveAnswerResult", isCorrect);
+        var command = new CheckAnswer.Command(roomId, answer);
+        var result = await sender.Send(command);
+        
+        if (result is not null)
+        {
+            await Clients.Group(roomId).SendAsync("ReceiveAnswerResult", result.IsCorrect, result.UserId);
+        }
     }
-    
-    public async Task NextRound(string roomName)
+    public async Task FindOpponent(int rating, string langFrom, string langTo)
     {
-        var roundWinner = "Player1";  //go to GameService to determine the winner of the round
-        await Clients.Group(roomName).SendAsync("NextRound", $"The next round in room {roomName} is starting!", roundWinner);
-    }
-    
-    public async Task EndGame(string roomName)
-    {
-        var winner = "Player1";  //go to GameService to determine the winner
-        var score = 0; //go to GameService to get the final score
-        await Clients.Group(roomName).SendAsync("EndGame", $"The game in room {roomName} has ended!", winner, score);
+        await Clients.Caller.SendAsync("OpponentFound", "123");
     }
 }

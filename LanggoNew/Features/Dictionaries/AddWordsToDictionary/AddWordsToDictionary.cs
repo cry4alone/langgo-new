@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FluentValidation;
 using LanggoNew.Endpoints;
 using LanggoNew.Models;
+using LanggoNew.Shared.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace LanggoNew.Features.Dictionaries;
@@ -9,11 +10,7 @@ namespace LanggoNew.Features.Dictionaries;
 public class AddWordsToDictionary
 {
             
-    public record DictionaryEntry(
-        string Original,
-        string Translation,
-        string Example,
-        int Difficulty);
+
     
     public record Request(
         List<DictionaryEntry> WordsWithTranslations);
