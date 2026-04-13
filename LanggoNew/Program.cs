@@ -23,6 +23,7 @@ builder.Services.AddHangfireAndHangfireServer(builder.Configuration);
 builder.Services.AddSignalR();
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddGameTimingOptions(builder.Configuration);
+builder.Services.AddEmailSmtp(builder.Configuration);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
@@ -33,6 +34,7 @@ builder.Services.AddJwt(builder.Configuration);
 builder.Services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddSingleton<IGameTimerService, GameTimerService>();
+builder.Services.AddSingleton<IEmailVerificationLinkFactory, EmailVerificationLinkFactory>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IRedisCache, RedisCache>();
 builder.Services.AddScoped<IWordService, WordService>();
@@ -45,6 +47,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
 }
 
 app.UseCors("AllowAll");

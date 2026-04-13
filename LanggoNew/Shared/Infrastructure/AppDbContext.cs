@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using LanggoNew.Models;
+using LanggoNew.Shared.Models;
 
 namespace LanggoNew;
 
@@ -15,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Game> Games { get; set; }
     public DbSet<Round> Rounds { get; set; }
     public DbSet<RoundUser> RoundUsers { get; set; }
+    public DbSet<EmailVerificationToken>  EmailVerificationTokens { get; set; }
 
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
@@ -162,6 +164,16 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
             .WithMany(r => r.RoundUsers)
             .HasForeignKey(ru => ru.RoundId)
             .OnDelete(DeleteBehavior.Cascade);
+    });
+    
+    modelBuilder.Entity<EmailVerificationToken>(entity =>
+    {
+        entity.HasKey(e => e.Id);
+        entity.ToTable("EmailVerificationTokens");
+
+        entity.HasOne(e => e.User)
+            .WithMany()
+            .HasForeignKey(e => e.UserId);
     });
 }
 }

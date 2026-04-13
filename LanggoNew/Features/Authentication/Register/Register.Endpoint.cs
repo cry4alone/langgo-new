@@ -8,7 +8,7 @@ public class Endpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("register", async (Command cmd, ISender sender, IValidator<Command> validator, CancellationToken cancellationToken) =>
+        app.MapPost("/auth/register", async (Command cmd, ISender sender, IValidator<Command> validator, CancellationToken cancellationToken) =>
         {
             await validator.ValidateAndThrowAsync(cmd, cancellationToken);
             

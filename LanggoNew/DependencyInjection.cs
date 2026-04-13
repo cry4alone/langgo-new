@@ -154,4 +154,12 @@ public static class DependencyInjection
         
         return services;
     }
+
+    public static IServiceCollection AddEmailSmtp(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddFluentEmail(configuration["EmailSettings:EmailSender"], configuration["EmailSettings:EmailSenderName"])
+            .AddSmtpSender(configuration["EmailSettings:Host"], configuration.GetValue<int>("EmailSettings:Port"));
+        
+        return services;
+    }
 }

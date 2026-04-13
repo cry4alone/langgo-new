@@ -32,7 +32,7 @@ public class RedisCache(IConnectionMultiplexer connectionMultiplexer) : IRedisCa
         var gameKey = $"game:{roomId}";
         var lockKey = $"lock:{gameKey}";
         var lockValue = Guid.NewGuid().ToString();
-
+        
         var acquired = await _cache.LockTakeAsync(lockKey, lockValue, TimeSpan.FromSeconds(5));
         if (!acquired)
             throw new Exception("Could not acquire lock");
