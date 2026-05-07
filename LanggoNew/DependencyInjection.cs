@@ -1,7 +1,7 @@
 using System.Text;
 using Hangfire;
 using Hangfire.Redis.StackExchange;
-using LanggoNew.Features.Dictionaries;
+using LanggoNew.Features.User.GetUserProfile;
 using LanggoNew.Shared.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -82,10 +82,12 @@ public static class DependencyInjection
         services.AddAutoMapper(cfg =>
         {
             cfg.LicenseKey = configuration["LuckyPenny:LicenseKey"];
-        }, typeof(DictionaryProfile));
-        
+            cfg.AddProfile<UserProfile>();
+        }); 
+    
         return services;
     }
+
     
     public static IServiceCollection AddMediatRConfig(this IServiceCollection services, IConfiguration configuration)
     {

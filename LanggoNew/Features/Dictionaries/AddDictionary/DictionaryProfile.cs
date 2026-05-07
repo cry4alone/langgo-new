@@ -1,5 +1,6 @@
 using AutoMapper;
 using LanggoNew.Models;
+using LanggoNew.Shared.Models;
 
 namespace LanggoNew.Features.Dictionaries;
 

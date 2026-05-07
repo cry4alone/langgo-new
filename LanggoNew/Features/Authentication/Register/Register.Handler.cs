@@ -12,7 +12,8 @@ public class Handler(
     IPasswordHashingService passwordHashingService,
     IJwtTokenGenerator jwtTokenGenerator,
     IFluentEmail fluentEmail,
-    IEmailVerificationLinkFactory emailVerificationLinkFactory) : IRequestHandler<Command, Response>
+    IEmailVerificationLinkFactory emailVerificationLinkFactory,
+    IRefreshTokenGenerator refreshTokenGenerator) : IRequestHandler<Command, Response>
 {
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
@@ -22,7 +23,7 @@ public class Handler(
         
         var hashedPassword = passwordHashingService.HashPassword(request.Password);
         
-        var user = new User
+        var user = new Models.User
         {
              Email = request.Email,
              Password = hashedPassword, 
@@ -56,11 +57,23 @@ public class Handler(
             .Body($"To verify your email address <a href={verificationLink}>click here</a>", isHtml: true)
             .SendAsync();
         
-        var token = jwtTokenGenerator.GenerateJwtToken(user);
-        return new Response(token);
+        var accessToken = jwtTokenGenerator.GenerateJwtToken(user);
+        var refreshToken = refreshTokenGenerator.GenerateRefreshToken();
+        
+        context.RefreshTokens.Add(new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenHash = refreshTokenGenerator.HashToken(refreshToken),
+            Expires = DateTime.UtcNow.AddDays(30),
+        });
+        
+        await context.SaveChangesAsync(cancellationToken);
+        
+        return new Response(accessToken, refreshToken);
     }
 
-    private string GenerateVerificationToken()
+    private static string GenerateVerificationToken()
     {
         return Guid.NewGuid().ToString();
     }

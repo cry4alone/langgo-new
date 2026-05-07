@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Round> Rounds { get; set; }
     public DbSet<RoundUser> RoundUsers { get; set; }
     public DbSet<EmailVerificationToken>  EmailVerificationTokens { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
@@ -174,6 +175,16 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
         entity.HasOne(e => e.User)
             .WithMany()
             .HasForeignKey(e => e.UserId);
+    });
+
+    modelBuilder.Entity<RefreshToken>(entity => 
+    {
+        entity.HasKey(e => e.Id);
+        entity.ToTable("RefreshTokens");
+
+        entity.HasOne(r => r.User)
+            .WithMany(u => u.RefreshTokens)
+            .HasForeignKey(r => r.UserId);
     });
 }
 }

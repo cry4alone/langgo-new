@@ -1,4 +1,6 @@
-namespace LanggoNew.Models;
+using LanggoNew.Models;
+
+namespace LanggoNew.Shared.Models;
 
 public class Dictionary
 {

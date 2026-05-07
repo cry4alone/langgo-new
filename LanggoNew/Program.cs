@@ -33,6 +33,7 @@ builder.Services.AddJwt(builder.Configuration);
 
 builder.Services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
 builder.Services.AddSingleton<IGameTimerService, GameTimerService>();
 builder.Services.AddSingleton<IEmailVerificationLinkFactory, EmailVerificationLinkFactory>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();

@@ -1,3 +1,5 @@
+using LanggoNew.Shared.Models;
+
 namespace LanggoNew.Models;
 
 public class Game

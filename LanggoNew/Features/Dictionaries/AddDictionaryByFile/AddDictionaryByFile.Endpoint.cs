@@ -7,6 +7,12 @@ namespace LanggoNew.Features.Dictionaries.AddDictionaryByFile;
 
 public class Endpoint : IEndpoint
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+    
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/dictionary/upload", async Task<Results<BadRequest<string>, Ok<string>>> (IFormFile file, ISender sender) =>
@@ -22,7 +28,7 @@ public class Endpoint : IEndpoint
             }
             
             await using var stream = file.OpenReadStream();
-            var command = await JsonSerializer.DeserializeAsync<Command>(stream);
+            var command = await JsonSerializer.DeserializeAsync<Command>(stream, _jsonOptions);
 
             await sender.Send(command);
             

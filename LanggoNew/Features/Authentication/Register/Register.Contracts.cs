@@ -12,5 +12,6 @@ public record Command(
     string NativeLanguage) : IRequest<Response>;
 
 public record Response(
-    string Token);
+    string AccessToken,
+    string RefreshToken);
     

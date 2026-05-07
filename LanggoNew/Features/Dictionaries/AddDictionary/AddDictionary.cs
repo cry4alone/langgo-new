@@ -2,8 +2,8 @@ using System.Security.Claims;
 using AutoMapper;
 using FluentValidation;
 using LanggoNew.Endpoints;
-using LanggoNew.Models;
 using LanggoNew.Shared.Enum;
+using LanggoNew.Shared.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace LanggoNew.Features.Dictionaries.AddDictionary;

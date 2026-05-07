@@ -1,6 +1,7 @@
 using LanggoNew.Models;
 using LanggoNew.Shared.Exceptions;
 using LanggoNew.Shared.Infrastructure.Services;
+using LanggoNew.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
