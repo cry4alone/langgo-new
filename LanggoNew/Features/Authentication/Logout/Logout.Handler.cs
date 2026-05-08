@@ -15,7 +15,7 @@ public class Handler(
 {
     public async Task Handle(Command request, CancellationToken cancellationToken)
     {
-        var currentUserId = int.Parse(currentUserService.GetCurrentUserId()); 
+        var currentUserId = currentUserService.GetCurrentUserId(); 
         
         var tokenHash = refreshTokenGenerator.HashToken(request.RefreshToken);
 

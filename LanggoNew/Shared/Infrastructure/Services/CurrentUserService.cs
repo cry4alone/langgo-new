@@ -4,18 +4,20 @@ namespace LanggoNew.Shared.Infrastructure.Services;
 
 public interface ICurrentUserService
 {
-    string GetCurrentUserId();  
+    int GetCurrentUserId();  
 }
 
 public class CurrentUserService(IHttpContextAccessor contextAccessor) : ICurrentUserService
 {
-    public string GetCurrentUserId()
+    public int GetCurrentUserId()
     {
         var context = contextAccessor.HttpContext;
-        if (context is null)
-            return "";
-        var currentUserId = context.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+        if (context == null) 
+            throw new UnauthorizedAccessException();
         
-        return currentUserId;
+        var currentUserId = context.User.Claims
+            .First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+            
+        return int.Parse(currentUserId);
     }
 }

@@ -11,7 +11,7 @@ public class Handler(IRedisCache cache, ICurrentUserService currentUserService) 
 {
     public async Task Handle(Command request, CancellationToken cancellationToken)
     {
-        var currentUserId = int.Parse(currentUserService.GetCurrentUserId());
+        var currentUserId = currentUserService.GetCurrentUserId();
         
         await cache.ExecuteWithLockAsync(request.RoomId, async (gameKey) =>
         {

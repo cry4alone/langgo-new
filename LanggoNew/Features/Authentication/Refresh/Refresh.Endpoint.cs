@@ -15,6 +15,7 @@ public class Endpoint : IEndpoint
                 var response = await sender.Send(new RefreshTokenCommand(refreshToken));
 
                 return TypedResults.Ok(response);
-            });
+            })
+            .WithTags("Authentication");
     }
 }

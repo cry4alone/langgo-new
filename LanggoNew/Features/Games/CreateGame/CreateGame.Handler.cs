@@ -31,7 +31,7 @@ public class Handler(
         context.Games.Add(newGame);
         await context.SaveChangesAsync(cancellationToken);
 
-        var currentUserId = currentUserService.GetCurrentUserId();
+        var currentUserId = currentUserService.GetCurrentUserId().ToString();
         
         var words = await wordService.GetRandomWordsFromDictionary(
             request.MaxRounds,

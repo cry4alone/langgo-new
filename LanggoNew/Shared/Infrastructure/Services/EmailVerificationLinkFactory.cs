@@ -4,6 +4,7 @@ namespace LanggoNew.Shared.Infrastructure.Services;
 public interface IEmailVerificationLinkFactory
 {
     string GenerateEmailVerificationLink(string emailVerificationToken);
+    string GenerateVerificationToken();
 }
 public class EmailVerificationLinkFactory(
     IHttpContextAccessor httpContextAccessor,
@@ -20,5 +21,10 @@ public class EmailVerificationLinkFactory(
             });
             
         return verificationlink ?? throw new Exception("Link generation failed");
+    }
+    
+    public string GenerateVerificationToken()
+    {
+        return Guid.NewGuid().ToString();
     }
 }

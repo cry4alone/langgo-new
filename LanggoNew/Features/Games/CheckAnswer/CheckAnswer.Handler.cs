@@ -20,7 +20,7 @@ public class Handler(
 {
     public async Task<Response?> Handle(Command request, CancellationToken cancellationToken)
     {
-        var currentUserId = int.Parse(currentUserService.GetCurrentUserId());
+        var currentUserId = currentUserService.GetCurrentUserId();
         var shouldEndRound = false;
         
         var response = await cache.ExecuteWithLockAsync(request.RoomId, async gameKey =>

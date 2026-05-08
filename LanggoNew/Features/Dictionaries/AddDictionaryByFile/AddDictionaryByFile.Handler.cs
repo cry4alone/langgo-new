@@ -11,7 +11,7 @@ public class Handler(AppDbContext context, ICurrentUserService currentUserServic
 {
     public async Task Handle(Command request, CancellationToken cancellationToken)
     {
-        var currentUserId = int.Parse(currentUserService.GetCurrentUserId());
+        var currentUserId = currentUserService.GetCurrentUserId();
         
         var exists = await context.Dictionaries
             .AnyAsync(d => d.Name == request.Name && d.OwnerId == currentUserId, cancellationToken);

@@ -11,6 +11,7 @@ public class Endpoint(ISender sender) : IEndpoint
         {
             await sender.Send(request);
         })
-        .RequireAuthorization();
+        .RequireAuthorization()
+        .WithTags("Authentication");
     }
 }

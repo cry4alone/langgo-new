@@ -12,7 +12,7 @@ public class Endpoint : IEndpoint
     {
         app.MapGet("user/profile", async (ISender sender, ICurrentUserService currentUserService) =>
         {
-            var userId = int.Parse(currentUserService.GetCurrentUserId());
+            var userId = currentUserService.GetCurrentUserId();
             var request = new Request(userId);
             var response = await sender.Send(request);
             return TypedResults.Ok(response);

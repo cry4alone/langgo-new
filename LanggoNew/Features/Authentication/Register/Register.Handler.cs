@@ -17,7 +17,8 @@ public class Handler(
 {
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
-        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken: cancellationToken);
+        var existingUser = await context.Users
+            .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
         if (existingUser is not null)
             throw new EmailAlreadyInUseException();
         
@@ -36,8 +37,7 @@ public class Handler(
          
         context.Users.Add(user);
 
-
-        var verificationToken = GenerateVerificationToken();
+        var verificationToken = emailVerificationLinkFactory.GenerateVerificationToken();
         
         context.EmailVerificationTokens.Add(new EmailVerificationToken
         {
@@ -48,8 +48,6 @@ public class Handler(
         });
         
         var verificationLink = emailVerificationLinkFactory.GenerateEmailVerificationLink(verificationToken);
-        
-        await context.SaveChangesAsync(cancellationToken);
         
         await fluentEmail
             .To(user.Email)
@@ -71,11 +69,5 @@ public class Handler(
         await context.SaveChangesAsync(cancellationToken);
         
         return new Response(accessToken, refreshToken);
-    }
-
-    private static string GenerateVerificationToken()
-    {
-        return Guid.NewGuid().ToString();
-    }
-    
+    }    
 }
