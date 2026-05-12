@@ -83,6 +83,7 @@ public static class DependencyInjection
         {
             cfg.LicenseKey = configuration["LuckyPenny:LicenseKey"];
             cfg.AddProfile<UserProfile>();
+            cfg.AddProfile<Features.Authentication.Authenticate.UserProfile>();
         }); 
     
         return services;

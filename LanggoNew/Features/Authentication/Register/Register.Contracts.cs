@@ -1,3 +1,4 @@
+using LanggoNew.Shared.DTO;
 using MediatR;
 
 namespace LanggoNew.Features.Authentication.Register;
@@ -13,5 +14,6 @@ public record Command(
 
 public record Response(
     string AccessToken,
-    string RefreshToken);
+    string RefreshToken,
+    UserInfo User);
     

@@ -1,6 +1,8 @@
+using LanggoNew.Shared.DTO;
 using MediatR;
 
 namespace LanggoNew.Features.Authentication.Authenticate;
 
 public record Command(string Email, string Password) : IRequest<Response>;
-public record Response(string AccessToken, string RefreshToken);
+public record Response(string AccessToken, string RefreshToken, UserInfo User);
+

@@ -1,5 +1,6 @@
+using AutoMapper;
 using FluentEmail.Core;
-using LanggoNew.Models;
+using LanggoNew.Shared.DTO;
 using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
 using MediatR;
@@ -13,7 +14,8 @@ public class Handler(
     IJwtTokenGenerator jwtTokenGenerator,
     IFluentEmail fluentEmail,
     IEmailVerificationLinkFactory emailVerificationLinkFactory,
-    IRefreshTokenGenerator refreshTokenGenerator) : IRequestHandler<Command, Response>
+    IRefreshTokenGenerator refreshTokenGenerator,
+    IMapper mapper) : IRequestHandler<Command, Response>
 {
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
@@ -55,19 +57,22 @@ public class Handler(
             .Body($"To verify your email address <a href={verificationLink}>click here</a>", isHtml: true)
             .SendAsync();
         
-        var accessToken = jwtTokenGenerator.GenerateJwtToken(user);
         var refreshToken = refreshTokenGenerator.GenerateRefreshToken();
         
         context.RefreshTokens.Add(new RefreshToken
         {
             Id = Guid.NewGuid(),
-            UserId = user.Id,
+            User = user,
             TokenHash = refreshTokenGenerator.HashToken(refreshToken),
             Expires = DateTime.UtcNow.AddDays(30),
         });
         
         await context.SaveChangesAsync(cancellationToken);
+
+        var accessToken = jwtTokenGenerator.GenerateJwtToken(user);
         
-        return new Response(accessToken, refreshToken);
+        var userInfo = mapper.Map<UserInfo>(user);
+        
+        return new Response(accessToken, refreshToken, userInfo);
     }    
 }

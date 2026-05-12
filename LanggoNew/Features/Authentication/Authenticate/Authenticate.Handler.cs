@@ -1,7 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper;
 using LanggoNew.Models;
+using LanggoNew.Shared.DTO;
 using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
 using MediatR;
@@ -15,7 +17,8 @@ public class Handler(
     AppDbContext context,
     IPasswordHashingService passwordHashingService,
     IJwtTokenGenerator jwtTokenGenerator,
-    IRefreshTokenGenerator refreshTokenGenerator)
+    IRefreshTokenGenerator refreshTokenGenerator,
+    IMapper mapper)
     : IRequestHandler<Command, Response>
 {
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -39,7 +42,17 @@ public class Handler(
         
         await context.SaveChangesAsync(cancellationToken);
         
-        return new Response(accessToken, refreshToken);
+        var userInfo = mapper.Map<UserInfo>(user);
+        
+        return new Response(accessToken, refreshToken, userInfo);
+    }
+}
+
+public class UserProfile : Profile
+{
+    public UserProfile()
+    {
+        CreateMap<Models.User, UserInfo>();
     }
 }
 
