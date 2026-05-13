@@ -3,6 +3,7 @@ using MediatR;
 namespace LanggoNew.Features.User.GetUserProfile;
 
 public record Response(
+    int Id,
     string Email,
     string Username,
     string FullName,

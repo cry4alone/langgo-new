@@ -8,6 +8,7 @@ public class UserProfile : Profile
     {
         CreateMap<Models.User, Response>()
             .ConstructUsing(src => new Response(
+                src.Id,
                 src.Email,
                 src.Username,
                 src.FullName,
