@@ -7,9 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LanggoNew.Features.Dictionaries.AddDictionaryByFile;
 
-public class Handler(AppDbContext context, ICurrentUserService currentUserService) : IRequestHandler<Command>
+public class Handler(
+    AppDbContext context,
+    ICurrentUserService currentUserService) : IRequestHandler<Request>
 {
-    public async Task Handle(Command request, CancellationToken cancellationToken)
+    public async Task Handle(Request request, CancellationToken cancellationToken)
     {
         var currentUserId = currentUserService.GetCurrentUserId();
         
@@ -17,9 +19,7 @@ public class Handler(AppDbContext context, ICurrentUserService currentUserServic
             .AnyAsync(d => d.Name == request.Name && d.OwnerId == currentUserId, cancellationToken);
 
         if (exists)
-        {
             throw new ConflictException("Dictionary with the same name already exists");
-        }
         
         var dictionary = new Dictionary()
         {
@@ -41,7 +41,6 @@ public class Handler(AppDbContext context, ICurrentUserService currentUserServic
         
         context.Dictionaries.Add(dictionary);
         await context.SaveChangesAsync(cancellationToken);
-        
-        // отправить количество добавленных слов в ответе
     }
 }
+

@@ -1,13 +1,12 @@
 using AutoMapper;
-using LanggoNew.Models;
 using LanggoNew.Shared.Models;
 
-namespace LanggoNew.Features.Dictionaries;
+namespace LanggoNew.Features.Dictionaries.AddDictionary;
 
 public class DictionaryProfile : Profile
 {
     public DictionaryProfile()
     {
-        CreateMap<AddDictionary.AddDictionary.Request, Dictionary>();
+        CreateMap<Request, Dictionary>();
     }
 }
