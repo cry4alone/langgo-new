@@ -9,7 +9,6 @@ using LanggoNew.Shared.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddSwagger();
 builder.Services.AddCorsConfig();
 builder.Services.AddRedis(builder.Configuration);
@@ -30,7 +29,6 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connect
 
 builder.Services.AddAuthorization();
 builder.Services.AddJwt(builder.Configuration);
-
 builder.Services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
@@ -39,7 +37,8 @@ builder.Services.AddSingleton<IEmailVerificationLinkFactory, EmailVerificationLi
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IRedisCache, RedisCache>();
 builder.Services.AddScoped<IWordService, WordService>();
-
+builder.Services.AddSingleton<IAmazonS3ClientFactory, AmazonS3ClientFactory>();
+builder.Services.AddScoped<IAvatarStorageService, AvatarStorageService>();
 builder.Services.AddEndpoints();
 
 var app = builder.Build();
@@ -50,6 +49,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 
     using var scope = app.Services.CreateScope();
+    var avatarStorage = scope.ServiceProvider.GetRequiredService<IAvatarStorageService>();
+    await avatarStorage.EnsureBucketExistsAsync();
+    
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.Migrate();
 }
