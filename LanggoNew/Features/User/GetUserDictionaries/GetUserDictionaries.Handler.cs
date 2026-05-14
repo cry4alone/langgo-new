@@ -1,3 +1,4 @@
+using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,7 @@ public class Handler(
                 d.LangFrom, 
                 d.LangTo, 
                 d.Description,
+                d.Scope,
                 wordsCounts.GetValueOrDefault(d.Id, 0)))
             .ToListAsync(cancellationToken);
 

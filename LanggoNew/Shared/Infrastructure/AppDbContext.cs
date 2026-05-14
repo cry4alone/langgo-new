@@ -1,15 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using LanggoNew.Models;
+﻿using LanggoNew.Models;
 using LanggoNew.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace LanggoNew;
+namespace LanggoNew.Shared.Infrastructure;
 
-public class AppDbContext : DbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
-
     public DbSet<User> Users { get; set; }
     public DbSet<Dictionary> Dictionaries { get; set; }
     public DbSet<DictionaryWord> DictionaryWords { get; set; }
@@ -73,6 +69,9 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 
         entity.Property(e => e.Description)
             .HasMaxLength(1000);
+
+        entity.Property(e => e.Scope)
+            .HasConversion<int>();
 
         entity.HasOne(d => d.Owner)
             .WithMany(u => u.Dictionaries)

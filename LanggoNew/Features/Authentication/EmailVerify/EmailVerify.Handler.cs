@@ -1,4 +1,5 @@
 using LanggoNew.Shared.Exceptions;
+using LanggoNew.Shared.Infrastructure;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

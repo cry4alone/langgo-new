@@ -12,7 +12,8 @@ public class Validator : AbstractValidator<Request>
             .NotEmpty()
             .Must(r => r.Count <= 100)
             .WithMessage("You can add up to 100 words at a time.");
-        RuleForEach(r => r.WordsWithTranslations).SetValidator(new DictionaryEntryValidator());
+        RuleForEach(r => r.WordsWithTranslations)
+            .SetValidator(new DictionaryEntryValidator());
     }
 }
 

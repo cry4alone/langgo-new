@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LanggoNew.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260409061433_EmailVerifToken")]
-    partial class EmailVerifToken
+    [Migration("20260514165027_AddDictionaryScope")]
+    partial class AddDictionaryScope
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,50 +25,6 @@ namespace LanggoNew.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("LanggoNew.Models.Dictionary", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<bool>("IsPublic")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("LangFrom")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<string>("LangTo")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<int>("OwnerId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OwnerId");
-
-                    b.ToTable("Dictionaries", (string)null);
-                });
 
             modelBuilder.Entity("LanggoNew.Models.DictionaryWord", b =>
                 {
@@ -236,6 +192,9 @@ namespace LanggoNew.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LearningLanguage")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -264,6 +223,53 @@ namespace LanggoNew.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("LanggoNew.Shared.Models.Dictionary", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LangFrom")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("LangTo")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Scope")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Dictionaries", (string)null);
+                });
+
             modelBuilder.Entity("LanggoNew.Shared.Models.EmailVerificationToken", b =>
                 {
                     b.Property<int>("Id")
@@ -278,6 +284,10 @@ namespace LanggoNew.Migrations
                     b.Property<DateTime>("ExpiresOnUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
@@ -288,20 +298,35 @@ namespace LanggoNew.Migrations
                     b.ToTable("EmailVerificationTokens", (string)null);
                 });
 
-            modelBuilder.Entity("LanggoNew.Models.Dictionary", b =>
+            modelBuilder.Entity("LanggoNew.Shared.Models.RefreshToken", b =>
                 {
-                    b.HasOne("LanggoNew.Models.User", "Owner")
-                        .WithMany("Dictionaries")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-                    b.Navigation("Owner");
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("LanggoNew.Models.DictionaryWord", b =>
                 {
-                    b.HasOne("LanggoNew.Models.Dictionary", "Dictionary")
+                    b.HasOne("LanggoNew.Shared.Models.Dictionary", "Dictionary")
                         .WithMany("Words")
                         .HasForeignKey("DictionaryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -312,7 +337,7 @@ namespace LanggoNew.Migrations
 
             modelBuilder.Entity("LanggoNew.Models.Game", b =>
                 {
-                    b.HasOne("LanggoNew.Models.Dictionary", "Dictionary")
+                    b.HasOne("LanggoNew.Shared.Models.Dictionary", "Dictionary")
                         .WithMany("Games")
                         .HasForeignKey("DictionaryId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -362,6 +387,17 @@ namespace LanggoNew.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("LanggoNew.Shared.Models.Dictionary", b =>
+                {
+                    b.HasOne("LanggoNew.Models.User", "Owner")
+                        .WithMany("Dictionaries")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("LanggoNew.Shared.Models.EmailVerificationToken", b =>
                 {
                     b.HasOne("LanggoNew.Models.User", "User")
@@ -373,11 +409,15 @@ namespace LanggoNew.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("LanggoNew.Models.Dictionary", b =>
+            modelBuilder.Entity("LanggoNew.Shared.Models.RefreshToken", b =>
                 {
-                    b.Navigation("Games");
+                    b.HasOne("LanggoNew.Models.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Words");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LanggoNew.Models.Game", b =>
@@ -396,9 +436,18 @@ namespace LanggoNew.Migrations
                 {
                     b.Navigation("Dictionaries");
 
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("RoundUsers");
 
                     b.Navigation("WonGames");
+                });
+
+            modelBuilder.Entity("LanggoNew.Shared.Models.Dictionary", b =>
+                {
+                    b.Navigation("Games");
+
+                    b.Navigation("Words");
                 });
 #pragma warning restore 612, 618
         }

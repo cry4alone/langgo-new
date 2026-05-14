@@ -1,3 +1,4 @@
+using LanggoNew.Shared.Enum;
 using MediatR;
 
 namespace LanggoNew.Features.Dictionaries.GetDictionaries;
@@ -8,6 +9,7 @@ public record DictionaryResponse(
     string LangFrom, 
     string LangTo, 
     string Description,
+    DictionaryScope Scope,
     int WordsCount);
 
 public record Response(List<DictionaryResponse> Dictionaries);

@@ -1,4 +1,5 @@
 using LanggoNew.Models;
+using LanggoNew.Shared.Enum;
 
 namespace LanggoNew.Shared.Models;
 
@@ -12,6 +13,7 @@ public class Dictionary
     public string Description { get; set; } = string.Empty;
     public bool IsPublic { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DictionaryScope Scope { get; set; }
 
     public User Owner { get; set; } = null!;
     public IEnumerable<DictionaryWord> Words { get; set; } = new List<DictionaryWord>();
