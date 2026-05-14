@@ -10,7 +10,8 @@ public static class GetDictionaries
         string Name, 
         string LangFrom, 
         string LangTo, 
-        string Description);
+        string Description,
+        int WordsCount);
     
     public class Endpoint : IEndpoint
     {
@@ -22,17 +23,22 @@ public static class GetDictionaries
     
     public static async Task<IResult> Handler(AppDbContext context)
     {
-        var dictionaries = await context.Dictionaries
+        var wordsCounts = await context.DictionaryWords
+            .GroupBy(dw => dw.DictionaryId)
+            .Select(g => new { DictionaryId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.DictionaryId, x => x.Count);
+
+        var responses = await context.Dictionaries
             .Where(d => d.IsPublic == true)
+            .Select(d => new Response(
+                d.Id, 
+                d.Name, 
+                d.LangFrom, 
+                d.LangTo, 
+                d.Description,
+                wordsCounts.GetValueOrDefault(d.Id, 0)))
             .ToListAsync();
-
-        var responses = dictionaries.Select(d => new Response(
-            d.Id, 
-            d.Name, 
-            d.LangFrom, 
-            d.LangTo, 
-            d.Description)).ToList();
-
+        
         return TypedResults.Ok(responses);
     }
 }

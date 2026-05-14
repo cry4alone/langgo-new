@@ -9,11 +9,11 @@ public class Endpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("auth/refresh",
-            async ([FromBody] string refreshToken,
+            async ([FromBody] RefreshTokenCommand command,
                 ISender sender) =>
             {
-                var response = await sender.Send(new RefreshTokenCommand(refreshToken));
-
+                var response = await sender.Send(command);
+                
                 return TypedResults.Ok(response);
             })
             .WithTags("Authentication");

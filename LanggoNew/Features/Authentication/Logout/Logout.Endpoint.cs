@@ -3,11 +3,11 @@ using MediatR;
 
 namespace LanggoNew.Features.Authentication.Logout;
 
-public class Endpoint(ISender sender) : IEndpoint
+public class Endpoint() : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("auth/logout", async (Command request) =>
+        app.MapPost("auth/logout", async (Command request, ISender sender) =>
         {
             await sender.Send(request);
         })
