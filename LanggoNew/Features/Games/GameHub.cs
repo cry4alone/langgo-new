@@ -13,18 +13,18 @@ public class GameHub(ISender sender) : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
         
         var command = new JoinGame.Command(roomId);
-        await sender.Send(command);
+        var response = await sender.Send(command);
         
-        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{Context.ConnectionId} has joined the room.");
+        await Clients.Group(roomId).SendAsync("ReceiveJoinRoom", response);
     }
     
     public async Task LeaveRoom(string roomId)
     {
-        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{Context.ConnectionId} has left the room");
         
         var command = new LeaveGame.Command(roomId);
-        await sender.Send(command);
+        var response = await sender.Send(command);
         
+        await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{response.UserId} has left the room");
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
     }
     

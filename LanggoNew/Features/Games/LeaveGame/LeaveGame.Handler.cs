@@ -5,9 +5,9 @@ using MediatR;
 
 namespace LanggoNew.Features.Games.LeaveGame;
 
-public class Handler(IRedisCache cache, ICurrentUserService currentUserService) : IRequestHandler<Command>
+public class Handler(IRedisCache cache, ICurrentUserService currentUserService) : IRequestHandler<Command, Response>
 {
-    public async Task Handle(Command request, CancellationToken cancellationToken)
+    public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
         var currentUserId = currentUserService.GetCurrentUserId();
         
@@ -15,8 +15,11 @@ public class Handler(IRedisCache cache, ICurrentUserService currentUserService) 
         {
             var currentGameState = await cache.GetDataAsync<GameState>(gameKey);
             currentGameState.PlayerUserIds.Remove(currentUserId);
+            
             // если игрков не осталось, заканчиваем игру
             await cache.SetDataAsync(gameKey, currentGameState);
         });
+        
+        return new Response(currentUserId);
     }
 }
