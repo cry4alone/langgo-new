@@ -12,10 +12,10 @@ public class GameHub(ISender sender) : Hub
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
         
-        var command = new JoinGame.Command(roomId);
+        var command = new JoinGame.Command(roomId, Context.ConnectionId);
         var response = await sender.Send(command);
         
-        await Clients.Group(roomId).SendAsync("ReceiveJoinRoom", response);
+        await Clients.Caller.SendAsync("ReceiveRoomState", response);
     }
     
     public async Task LeaveRoom(string roomId)

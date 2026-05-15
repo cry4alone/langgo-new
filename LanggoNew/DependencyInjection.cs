@@ -1,6 +1,7 @@
 using System.Text;
 using Hangfire;
 using Hangfire.Redis.StackExchange;
+using LanggoNew.Features.Games.JoinGame;
 using LanggoNew.Features.User.GetUserProfile;
 using LanggoNew.Shared.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -84,6 +85,7 @@ public static class DependencyInjection
             cfg.LicenseKey = configuration["LuckyPenny:LicenseKey"];
             cfg.AddProfile<UserProfile>();
             cfg.AddProfile<Features.Authentication.Authenticate.UserProfile>();
+            cfg.AddProfile<JoinGameProfile>();
         }); 
     
         return services;
