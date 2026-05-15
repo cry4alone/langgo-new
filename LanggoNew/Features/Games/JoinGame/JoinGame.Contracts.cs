@@ -8,6 +8,7 @@ public record Response(int UserId,
     bool IsHost,
     string AvatarUrl,
     string NativeLanguage,
-    int Rating);
+    int Rating,
+    List<int> Players);
     
     
