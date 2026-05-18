@@ -10,7 +10,12 @@ using Microsoft.Extensions.Options;
 namespace LanggoNew.Features.Games.EndRound;
 
 public record Command(string RoomId) : IRequest;
-public record Response(int? WinnerId, Dictionary<int, int> Scores, DateTime NewRoundTime);
+public record Response(
+    int? WinnerId,
+    Dictionary<int, int> Scores,
+    DateTime NewRoundTime,
+    string CorrectAnswer,
+    TimeSpan? ResponseTime);
 
 public class Handler(
     IRedisCache cache,
@@ -34,22 +39,30 @@ public class Handler(
             {
                 return;
             }
-
+            
             await timerService.CancelJob(currentGameState.CurrentJobId);
-
+            
             currentGameState.IsRoundEnding = true;
             currentGameState.LastEndedRound = currentGameState.CurrentRound;
-
+            
+            var correctAnswer = currentGameState.CurrentWordData.Translation;
+            
+            var roundStartUtc = currentGameState.CurrentJobEndTimeUtc
+                            - TimeSpan.FromSeconds(timingOptions.Value.RoundDurationSeconds);
+            var responseTime = DateTime.UtcNow - roundStartUtc;
+            
             currentGameState.CurrentJobId = await timerService.ScheduleStartNewRound(request.RoomId);
             var newRoundTime = DateTime.UtcNow.AddSeconds(timingOptions.Value.PauseBetweenRoundsSeconds);
             currentGameState.CurrentJobEndTimeUtc = newRoundTime;
-
+            
             await cache.SetDataAsync(gameKey, currentGameState);
             
             await hubContext.Clients.Group(request.RoomId).SendAsync("EndRound",
                 new Response(winnerId,
                     scores,
-                    newRoundTime),
+                    newRoundTime,
+                    correctAnswer,
+                    responseTime),
                 cancellationToken);
         });
     }
