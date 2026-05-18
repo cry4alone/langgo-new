@@ -1,3 +1,5 @@
+using LanggoNew.Shared.DTO;
+using LanggoNew.Shared.Enum;
 using MediatR;
 
 namespace LanggoNew.Features.Games.CreateGame;
@@ -7,4 +9,5 @@ public record Command(
     int Mode, 
     int MaxRounds) : IRequest<Response>;
 
-public record Response(string RoomId);
+public record Response(string RoomId, GameSettings Settings);
+

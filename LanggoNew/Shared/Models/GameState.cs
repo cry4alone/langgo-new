@@ -19,10 +19,8 @@ public class GameState
     
     public DateTime? CurrentJobEndTimeUtc { get; set; }
 
-    // Когда true, ответы в текущем раунде больше не принимаются.
     public bool IsRoundEnding { get; set; }
 
-    // Номер раунда, для которого EndRound уже успешно выполнен.
     public int LastEndedRound { get; set; }
 
     public Stack<int> RoundWinners { get; set; } = new Stack<int>();

@@ -46,6 +46,7 @@ public class GameHub(ISender sender) : Hub
             await Clients.Group(roomId).SendAsync("ReceiveAnswerResult", result.IsCorrect, result.UserId);
         }
     }
+    
     public async Task FindOpponent(int rating, string langFrom, string langTo)
     {
         await Clients.Caller.SendAsync("OpponentFound", "123");

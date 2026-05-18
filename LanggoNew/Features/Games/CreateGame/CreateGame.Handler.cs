@@ -1,10 +1,12 @@
 using LanggoNew.Models;
+using LanggoNew.Shared.DTO;
 using LanggoNew.Shared.Enum;
 using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using static System.Enum;
 
 namespace LanggoNew.Features.Games.CreateGame;
 
@@ -23,7 +25,7 @@ public class Handler(
         var newGame = new Game()
         {
             DictionaryId = request.DictionaryId,
-            Mode = Enum.GetName(typeof(GameMode), request.Mode),
+            Mode = GetName(typeof(GameMode), request.Mode),
             RoundsCount = request.MaxRounds,
             Status = nameof(GameStatus.Waiting),
             CreatedAt = DateTime.UtcNow
@@ -50,11 +52,22 @@ public class Handler(
             PlayerUserIds = [],
             MaxRounds = request.MaxRounds,
         };
+        
+        if (!TryParse(existingDictionary.LangFrom, true, out LanguageCode langFrom) ||
+            !TryParse(existingDictionary.LangTo, true, out LanguageCode langTo))
+            throw new InvalidOperationException("Invalid language codes.");
+
+        
+        Console.WriteLine($"Langs before{existingDictionary.LangFrom} {existingDictionary.LangTo} langs after {langFrom} {langTo}");
+        
         await cache.SetDataAsync(
             $"game:{gameState.RoomId}",
             gameState);
-
-        return new Response(gameState.RoomId);
+        
+        return new Response(gameState.RoomId, new GameSettings(existingDictionary.Name,
+            langFrom,
+            langTo,
+            request.MaxRounds));
     }
 
 }
