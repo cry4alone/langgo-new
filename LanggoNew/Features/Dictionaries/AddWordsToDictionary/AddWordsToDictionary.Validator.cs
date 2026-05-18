@@ -1,5 +1,5 @@
 using FluentValidation;
-using LanggoNew.Shared.Models;
+using LanggoNew.Shared.Validators;
 
 namespace LanggoNew.Features.Dictionaries.AddWordsToDictionary;
 
@@ -16,14 +16,3 @@ public class Validator : AbstractValidator<Request>
             .SetValidator(new DictionaryEntryValidator());
     }
 }
-
-public class DictionaryEntryValidator : AbstractValidator<DictionaryEntry>
-{
-    public DictionaryEntryValidator()
-    {
-        RuleFor(e => e.Original).NotEmpty();
-        RuleFor(e => e.Translation).NotEmpty();
-        RuleFor(e => e.Difficulty).InclusiveBetween(1, 5);
-    }
-}
-

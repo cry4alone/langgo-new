@@ -14,6 +14,8 @@ public class Dictionary
     public bool IsPublic { get; set; }
     public DateTime CreatedAt { get; set; }
     public DictionaryScope Scope { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     public User Owner { get; set; } = null!;
     public IEnumerable<DictionaryWord> Words { get; set; } = new List<DictionaryWord>();

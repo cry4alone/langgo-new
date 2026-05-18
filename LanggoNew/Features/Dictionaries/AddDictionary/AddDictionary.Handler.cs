@@ -1,4 +1,5 @@
 using AutoMapper;
+using LanggoNew.Models;
 using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
@@ -22,7 +23,17 @@ public class Handler(
         newDictionary.OwnerId = currentUserId;
         
         context.Dictionaries.Add(newDictionary);
+        
+        var wordsToAdd = request.WordsWithTranslations.Select(entry => new DictionaryWord
+        {
+            Original = entry.Original,
+            Translation = entry.Translation,
+            Example = entry.Example,
+            Difficulty = entry.Difficulty,
+            Dictionary = newDictionary
+        }).ToList();
+
+        await context.DictionaryWords.AddRangeAsync(wordsToAdd, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 }
-

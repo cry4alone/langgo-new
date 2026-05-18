@@ -1,6 +1,7 @@
 using System.Text;
 using Hangfire;
 using Hangfire.Redis.StackExchange;
+using LanggoNew.Features.Dictionaries.AddDictionary;
 using LanggoNew.Features.Games.JoinGame;
 using LanggoNew.Features.User.GetUserProfile;
 using LanggoNew.Shared.Config;
@@ -86,6 +87,7 @@ public static class DependencyInjection
             cfg.AddProfile<UserProfile>();
             cfg.AddProfile<Features.Authentication.Authenticate.UserProfile>();
             cfg.AddProfile<JoinGameProfile>();
+            cfg.AddProfile<DictionaryProfile>();
         }); 
     
         return services;

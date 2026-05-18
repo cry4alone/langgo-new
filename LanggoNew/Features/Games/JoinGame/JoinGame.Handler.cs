@@ -79,8 +79,12 @@ public class Handler(
 
         var dictionary = await context.Dictionaries
             .AsNoTracking()
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(d => d.Id == gameData.DictionaryId, cancellationToken);
-        
+
+        if (dictionary == null)
+            throw new NotFoundException("Dictionary not found.");
+
         if (!Enum.TryParse(dictionary.LangFrom, true, out LanguageCode langFrom) ||
             !Enum.TryParse(dictionary.LangTo, true, out LanguageCode langTo))
             throw new InvalidOperationException("Invalid language codes.");

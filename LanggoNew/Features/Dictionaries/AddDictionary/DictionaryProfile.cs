@@ -7,6 +7,8 @@ public class DictionaryProfile : Profile
 {
     public DictionaryProfile()
     {
-        CreateMap<Request, Dictionary>();
+        CreateMap<Request, Dictionary>()
+            .ForMember(d => d.LangFrom, opt => opt.MapFrom(s => s.LangFrom.ToString()))
+            .ForMember(d => d.LangTo, opt => opt.MapFrom(s => s.LangTo.ToString()));
     }
 }

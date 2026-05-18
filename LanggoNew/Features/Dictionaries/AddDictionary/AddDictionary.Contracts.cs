@@ -1,4 +1,5 @@
 using LanggoNew.Shared.Enum;
+using LanggoNew.Shared.Models;
 using MediatR;
 
 namespace LanggoNew.Features.Dictionaries.AddDictionary;
@@ -8,7 +9,8 @@ public record Request(
     LanguageCode LangFrom, 
     LanguageCode LangTo,
     string Description,
-    bool IsPublic) : IRequest;
+    bool IsPublic,
+    List<DictionaryEntry> WordsWithTranslations) : IRequest;
 
 public record Response;
 

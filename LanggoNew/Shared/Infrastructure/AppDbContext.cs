@@ -73,6 +73,11 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
         entity.Property(e => e.Scope)
             .HasConversion<int>();
 
+        entity.Property(e => e.IsDeleted)
+            .HasDefaultValue(false);
+
+        entity.HasQueryFilter(d => !d.IsDeleted);
+
         entity.HasOne(d => d.Owner)
             .WithMany(u => u.Dictionaries)
             .HasForeignKey(d => d.OwnerId)
