@@ -31,7 +31,7 @@ public class Handler(
                 ?? throw new NotFoundException($"Game state not found for room '{request.RoomId}'");
 
             var scores = new Dictionary<int, int>(currentGameState.UserScores);
-            int? winnerId = currentGameState.RoundWinners.TryPeek(out var roundWinnerId)
+            int? winnerId = currentGameState.RoundWinners.TryPop(out var roundWinnerId)
                 ? roundWinnerId
                 : null;
 

@@ -3,6 +3,7 @@ using LanggoNew.Shared.Enum;
 using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
+using LanggoNew.Shared.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Options;
 
@@ -18,6 +19,8 @@ public class Handler(
         return await cache.ExecuteWithLockAsync(request.RoomId, async (gameKey) =>
         {
             var gameState = await cache.GetDataAsync<GameState>(gameKey);
+            if (gameState is null)
+                throw new NotFoundException("GameState not found.");
             
             gameState.Status = GameStatus.InProgress;
             
