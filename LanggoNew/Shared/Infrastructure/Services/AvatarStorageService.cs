@@ -1,6 +1,9 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using LanggoNew.Shared.Infrastructure;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
 
 namespace LanggoNew.Shared.Infrastructure.Services;
 
@@ -28,13 +31,12 @@ public class AvatarStorageService(IAmazonS3ClientFactory factory, IConfiguration
         var safeFileName = Path.GetFileName(file.FileName);
         var key = $"avatars/{userId}/{Guid.NewGuid()}_{safeFileName}";
         
-        await using var stream = file.OpenReadStream();
+        var stream = await ProcessImageAsync(file.OpenReadStream());
         await _internalS3.PutObjectAsync(new PutObjectRequest
         {
             BucketName = _bucket,
             Key = key,
-            InputStream = stream,
-            ContentType = file.ContentType
+            InputStream = stream
         });
 
         return key;
@@ -56,5 +58,22 @@ public class AvatarStorageService(IAmazonS3ClientFactory factory, IConfiguration
     public async Task DeleteAsync(string key)
     {
         await _internalS3.DeleteObjectAsync(_bucket, key);
+    }
+    
+    private static async Task<Stream> ProcessImageAsync(Stream inputStream)
+    {
+        using var image = await Image.LoadAsync(inputStream);
+        
+        image.Mutate(x => x.Resize(new ResizeOptions
+        {
+            Mode = ResizeMode.Max,
+            Size = new Size(1024, 1024)
+        }));
+        
+        var memoryStream = new MemoryStream();
+        await image.SaveAsWebpAsync(memoryStream, new WebpEncoder { Quality = 75 });
+        memoryStream.Position = 0;
+        
+        return memoryStream;
     }
 }
