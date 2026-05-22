@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<RoundUser> RoundUsers { get; set; }
     public DbSet<EmailVerificationToken>  EmailVerificationTokens { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Friendship> Friendships { get; set; }
 
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
@@ -190,5 +191,20 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
             .WithMany(u => u.RefreshTokens)
             .HasForeignKey(r => r.UserId);
     });
+
+    modelBuilder.Entity<Friendship>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.ToTable("Friendships");
+
+            entity.HasOne(f => f.User)
+                .WithMany(u => u.Friendships)
+                .HasForeignKey(f => f.UserId);
+
+            entity.HasOne(f => f.Friend)
+                .WithMany()
+                .HasForeignKey(f => f.FriendId);
+        }
+    );
 }
 }

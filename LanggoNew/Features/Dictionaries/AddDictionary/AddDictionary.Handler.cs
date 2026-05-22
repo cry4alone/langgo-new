@@ -24,7 +24,8 @@ public class Handler(
         
         context.Dictionaries.Add(newDictionary);
         
-        var wordsToAdd = request.WordsWithTranslations.Select(entry => new DictionaryWord
+        var entries = request.WordsWithTranslations ?? new List<DictionaryEntry>();
+        var wordsToAdd = entries.Select(entry => new DictionaryWord
         {
             Original = entry.Original,
             Translation = entry.Translation,
@@ -33,7 +34,11 @@ public class Handler(
             Dictionary = newDictionary
         }).ToList();
 
-        await context.DictionaryWords.AddRangeAsync(wordsToAdd, cancellationToken);
+        if (wordsToAdd.Count > 0)
+        {
+            await context.DictionaryWords.AddRangeAsync(wordsToAdd, cancellationToken);
+        }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 }

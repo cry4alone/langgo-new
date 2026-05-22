@@ -31,7 +31,7 @@ public class Handler(
             IsPublic = request.IsPublic,
             OwnerId = currentUserId,
             CreatedAt = DateTime.UtcNow,
-            Words = request.Entries.Select(e => new DictionaryWord
+            Words = request.WordsWithTranslations.Select(e => new DictionaryWord
             {
                 Original = e.Original,
                 Translation = e.Translation,

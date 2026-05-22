@@ -1,5 +1,8 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using LanggoNew;
 using LanggoNew.Endpoints;
 using LanggoNew.Features.Games;
@@ -8,6 +11,12 @@ using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+});
 
 builder.Services.AddSwagger();
 builder.Services.AddCorsConfig();

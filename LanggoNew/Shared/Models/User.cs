@@ -19,4 +19,5 @@ public class User
     public ICollection<Game> WonGames { get; set; } = new List<Game>();
     public ICollection<RoundUser> RoundUsers { get; set; } = new List<RoundUser>();
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+    public ICollection<Friendship> Friendships { get; set; } = new List<Friendship>();
 }

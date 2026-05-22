@@ -9,4 +9,4 @@ public record Request(
     string LangTo,
     string Description,
     bool IsPublic,
-    List<DictionaryEntry> Entries) : IRequest;
+    List<DictionaryEntry> WordsWithTranslations) : IRequest;
