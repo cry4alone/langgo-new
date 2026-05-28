@@ -67,7 +67,7 @@ public class AvatarStorageService(IAmazonS3ClientFactory factory, IConfiguration
         image.Mutate(x => x.Resize(new ResizeOptions
         {
             Mode = ResizeMode.Max,
-            Size = new Size(1024, 1024)
+            Size = new Size(512, 512)
         }));
         
         var memoryStream = new MemoryStream();

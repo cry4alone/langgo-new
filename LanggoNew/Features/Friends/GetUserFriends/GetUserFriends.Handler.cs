@@ -1,9 +1,6 @@
-using AutoMapper;
-using LanggoNew.Migrations;
 using LanggoNew.Shared.Enum;
 using LanggoNew.Shared.Infrastructure;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace LanggoNew.Features.Friends.GetUserFriends;
@@ -15,7 +12,7 @@ public record FriendResponse(
     string FullName,
     string AvatarUrl);
 
-public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Query, List<FriendResponse>>
+public class Handler(AppDbContext context) : IRequestHandler<Query, List<FriendResponse>>
 {
     public async Task<List<FriendResponse>> Handle(Query request, CancellationToken cancellationToken)
     {
@@ -23,11 +20,22 @@ public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Que
         if (currUser is null) 
             throw new KeyNotFoundException("User not found");
         
-        var friends = await context.Friendships
+        var friendsFromRequests = context.Friendships
             .Where(f => f.UserId == request.UserId && f.Status == FriendshipStatus.Accepted)
-            .Select(f => f.Friend)
+            .Select(f => f.Friend);
+
+        var friendsFromIncoming = context.Friendships
+            .Where(f => f.FriendId == request.UserId && f.Status == FriendshipStatus.Accepted)
+            .Select(f => f.User);
+
+        var friends = await friendsFromRequests
+            .Union(friendsFromIncoming)
+            .Select(u => new FriendResponse(
+                u.Id,
+                u.FullName,
+                u.Avatar))
             .ToListAsync(cancellationToken);
         
-        return mapper.Map<List<FriendResponse>>(friends);
+        return friends;
     }
 }
