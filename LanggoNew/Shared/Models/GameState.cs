@@ -25,6 +25,7 @@ public class GameState
 
     public Stack<int> RoundWinners { get; set; } = new Stack<int>();
     public Dictionary<int, int> UserScores { get; set; } = new Dictionary<int, int>();
+    public HashSet<int> PendingInvites { get; set; } = [];
 }
 
 public class WordData
