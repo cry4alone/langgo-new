@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using LanggoNew;
 using LanggoNew.Endpoints;
 using LanggoNew.Features.Games;
+using LanggoNew.Features.Notifications;
 using LanggoNew.Middleware;
 using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
@@ -72,6 +73,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<GameHub>("/game");
+app.MapHub<NotificationHub>("/notifications");
 app.MapEndpoints();
 
 app.Run();

@@ -4,13 +4,15 @@ using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 using LanggoNew.Shared.Models;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace LanggoNew.Features.Friends.SendFriendRequest;
 
 public class Handler(
     AppDbContext context,
-    ICurrentUserService currentUserService) : IRequestHandler<Command>
+    ICurrentUserService currentUserService,
+    IHubContext<Notifications.NotificationHub> notificationHub) : IRequestHandler<Command>
 {
     public async Task Handle(Command request, CancellationToken cancellationToken)
     {
@@ -30,6 +32,11 @@ public class Handler(
         if (relationshipExists)
             throw new ConflictException("Friendship or request already exists.");
 
+        var senderUsername = await context.Users
+            .Where(u => u.Id == currentUserId)
+            .Select(u => u.Username)
+            .FirstAsync(cancellationToken);
+
         var friendship = new Friendship
         {
             UserId = currentUserId,
@@ -40,6 +47,15 @@ public class Handler(
 
         context.Friendships.Add(friendship);
         await context.SaveChangesAsync(cancellationToken);
+
+        await notificationHub.Clients
+            .User(request.FriendId.ToString())
+            .SendAsync("FriendRequestReceived", new
+            {
+                friendshipId = friendship.Id,
+                fromUserId = currentUserId,
+                fromUsername = senderUsername
+            }, cancellationToken);
     }
 }
 

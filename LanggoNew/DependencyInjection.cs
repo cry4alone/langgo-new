@@ -128,7 +128,8 @@ public static class DependencyInjection
                         var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path;
 
-                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/game"))
+                        if (!string.IsNullOrEmpty(accessToken) && 
+                            (path.StartsWithSegments("/game") || path.StartsWithSegments("/notifications")))
                             context.Token = accessToken;
 
                         return Task.CompletedTask;

@@ -3,13 +3,15 @@ using LanggoNew.Shared.Exceptions;
 using LanggoNew.Shared.Infrastructure;
 using LanggoNew.Shared.Infrastructure.Services;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace LanggoNew.Features.Friends.RespondToFriendRequest;
 
 public class Handler(
     AppDbContext context,
-    ICurrentUserService currentUserService) : IRequestHandler<Command>
+    ICurrentUserService currentUserService,
+    IHubContext<Notifications.NotificationHub> notificationHub) : IRequestHandler<Command>
 {
     public async Task Handle(Command request, CancellationToken cancellationToken)
     {
@@ -36,6 +38,15 @@ public class Handler(
         }
 
         await context.SaveChangesAsync(cancellationToken);
+
+        await notificationHub.Clients
+            .User(request.RequesterId.ToString())
+            .SendAsync("FriendRequestResponse", new
+            {
+                friendshipId = friendship.Id,
+                accepted = request.Accept,
+                fromUserId = currentUserId
+            }, cancellationToken);
     }
 }
 

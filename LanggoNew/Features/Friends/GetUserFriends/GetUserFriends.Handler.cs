@@ -1,41 +1,99 @@
 using LanggoNew.Shared.Enum;
 using LanggoNew.Shared.Infrastructure;
+using LanggoNew.Shared.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace LanggoNew.Features.Friends.GetUserFriends;
 
-public record Query(int UserId) : IRequest<List<FriendResponse>>;
+public record Query(int UserId) : IRequest<List<UserProfile>>;
 
-public record FriendResponse(
-    int UserId,
-    string FullName,
-    string AvatarUrl);
-
-public class Handler(AppDbContext context) : IRequestHandler<Query, List<FriendResponse>>
+public sealed class UserProfile
 {
-    public async Task<List<FriendResponse>> Handle(Query request, CancellationToken cancellationToken)
+    private readonly int _id;
+    private readonly string _username;
+    private readonly string _fullName;
+    private readonly string? _avatarUrl;
+    private readonly LanguageCode _learningLanguage;
+    private readonly LanguageCode _nativeLanguage;
+
+    public int Id => _id;
+    public string Username => _username;
+    public string FullName => _fullName;
+    public string? AvatarUrl => _avatarUrl;
+    public LanguageCode LearningLanguage => _learningLanguage;
+    public LanguageCode NativeLanguage => _nativeLanguage;
+
+    public UserProfile(
+        int id,
+        string username,
+        string fullName,
+        string? avatarUrl,
+        LanguageCode learningLanguage,
+        LanguageCode nativeLanguage)
     {
-        var currUser = context.Users.FirstOrDefault(u => u.Id == request.UserId);
-        if (currUser is null) 
+        _id = id;
+        _username = username;
+        _fullName = fullName;
+        _avatarUrl = avatarUrl;
+        _learningLanguage = learningLanguage;
+        _nativeLanguage = nativeLanguage;
+    }
+}
+
+public class Handler(AppDbContext context, IAvatarStorageService avatarStorageService) : IRequestHandler<Query, List<UserProfile>>
+{
+    public async Task<List<UserProfile>> Handle(Query request, CancellationToken cancellationToken)
+    {
+        var currUserExists = await context.Users.AnyAsync(u => u.Id == request.UserId, cancellationToken);
+        if (!currUserExists)
             throw new KeyNotFoundException("User not found");
         
         var friendsFromRequests = context.Friendships
             .Where(f => f.UserId == request.UserId && f.Status == FriendshipStatus.Accepted)
-            .Select(f => f.Friend);
+            .Select(f => new
+            {
+                f.Friend.Id,
+                f.Friend.Username,
+                f.Friend.FullName,
+                f.Friend.Avatar,
+                f.Friend.LearningLanguage,
+                f.Friend.NativeLanguage
+            });
 
         var friendsFromIncoming = context.Friendships
             .Where(f => f.FriendId == request.UserId && f.Status == FriendshipStatus.Accepted)
-            .Select(f => f.User);
+            .Select(f => new
+            {
+                f.User.Id,
+                f.User.Username,
+                f.User.FullName,
+                f.User.Avatar,
+                f.User.LearningLanguage,
+                f.User.NativeLanguage
+            });
 
         var friends = await friendsFromRequests
             .Union(friendsFromIncoming)
-            .Select(u => new FriendResponse(
-                u.Id,
-                u.FullName,
-                u.Avatar))
             .ToListAsync(cancellationToken);
-        
-        return friends;
+
+        var result = await Task.WhenAll(friends.Select(async friend =>
+        {
+            string? avatarUrl = null;
+            if (!string.IsNullOrWhiteSpace(friend.Avatar) || friend.Avatar != "string")
+            {
+                avatarUrl = await avatarStorageService.GetPresignedUrlAsync(friend.Avatar, TimeSpan.FromMinutes(15));
+            }
+
+            return new UserProfile(
+                friend.Id,
+                friend.Username,
+                friend.FullName,
+                avatarUrl,
+                Enum.Parse<LanguageCode>(friend.LearningLanguage, ignoreCase: true),
+                Enum.Parse<LanguageCode>(friend.NativeLanguage, ignoreCase: true));
+        }));
+
+        return result.ToList();
     }
 }

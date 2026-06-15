@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notification Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <style>
+        body { font-family: monospace; max-width: 600px; margin: 40px auto; }
+        input, button { padding: 8px; margin: 4px; }
+        #log { background: #111; color: #0f0; padding: 16px; margin-top: 16px; white-space: pre-wrap; height: 300px; overflow-y: auto; font-size: 13px; }
+        .status { margin: 8px 0; }
+        .connected { color: green; }
+        .disconnected { color: red; }
+    </style>
+</head>
+<body>
+    <h3>SignalR Notification Test</h3>
+
+    <div>
+        <label>JWT Token:</label><br>
+        <input type="text" id="token" style="width:100%" placeholder="Bearer eyJhbGci...">
+    </div>
+    <div>
+        <label>Target User ID (for sending friend request):</label>
+        <input type="number" id="targetUserId" value="1" style="width:100px">
+    </div>
+
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+    <button onclick="sendFriendRequest()">Send Friend Request</button>
+    <button onclick="respondToRequest(1, true)">Accept (requesterId=1)</button>
+    <button onclick="respondToRequest(1, false)">Decline (requesterId=1)</button>
+
+    <div class="status" id="status">Disconnected</div>
+    <div id="log"></div>
+
+    <script>
+        let connection;
+        const API = 'http://localhost:5000';
+
+        function getToken() {
+            const raw = document.getElementById('token').value;
+            return raw.replace('Bearer ', '');
+        }
+
+        function log(msg) {
+            const el = document.getElementById('log');
+            el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function setStatus(text, connected) {
+            const el = document.getElementById('status');
+            el.textContent = text;
+            el.className = 'status ' + (connected ? 'connected' : 'disconnected');
+        }
+
+        async function connect() {
+            const token = getToken();
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`${API}/notifications`, { accessTokenFactory: () => token })
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on('FriendRequestReceived', (data) => {
+                log(`📩 FriendRequestReceived: friendshipId=${data.friendshipId}, from=${data.fromUsername} (id=${data.fromUserId})`);
+            });
+
+            connection.on('FriendRequestResponse', (data) => {
+                log(`📩 FriendRequestResponse: friendshipId=${data.friendshipId}, accepted=${data.accepted}, fromUserId=${data.fromUserId}`);
+            });
+
+            connection.onreconnecting(() => setStatus('Reconnecting...', false));
+            connection.onreconnected(() => setStatus('Connected', true));
+            connection.onclose(() => setStatus('Disconnected', false));
+
+            try {
+                await connection.start();
+                setStatus('Connected', true);
+                log('Connected to /notifications');
+            } catch (e) {
+                setStatus('Error: ' + e, false);
+                log('Connection error: ' + e);
+            }
+        }
+
+        async function disconnect() {
+            if (connection) await connection.stop();
+        }
+
+        async function sendFriendRequest() {
+            const friendId = parseInt(document.getElementById('targetUserId').value);
+            const token = getToken();
+            try {
+                const res = await fetch(`${API}/friends/requests`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ friendId })
+                });
+                log(`POST /friends/requests → ${res.status}`);
+            } catch (e) {
+                log('Error: ' + e);
+            }
+        }
+
+        async function respondToRequest(requesterId, accept) {
+            const token = getToken();
+            try {
+                const res = await fetch(`${API}/friends/requests/${requesterId}/respond`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ accept })
+                });
+                log(`POST /friends/requests/${requesterId}/respond → ${res.status}`);
+            } catch (e) {
+                log('Error: ' + e);
+            }
+        }
+    </script>
+</body>
+</html>
