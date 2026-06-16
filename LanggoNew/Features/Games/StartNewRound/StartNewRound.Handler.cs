@@ -9,12 +9,18 @@ using Microsoft.Extensions.Options;
 
 namespace LanggoNew.Features.Games.StartNewRound;
 public record Command(string RoomId) : IRequest;
-public record Response(string NewWord, int RoundNumber, DateTime TimeForRoundSeconds);
+public record Response(
+    string NewWord,
+    int RoundNumber,
+    DateTime TimeForRoundSeconds,
+    bool IsChoiceRound,
+    List<string>? Options);
 
 public class Handler(
     IRedisCache cache,
     ISender sender,
     IGameTimerService timerService,
+    IWordService wordService,
     IOptions<GameTimingOptions> timingOptions,
     IHubContext<GameHub> hubContext) : IRequestHandler<Command>
 {
@@ -38,7 +44,29 @@ public class Handler(
             var currentRound = ++currentGameState.CurrentRound;
             var newWord = currentGameState.CurrentWordData.Original;
 
+            currentGameState.IsCurrentRoundChoice = !currentGameState.IsCurrentRoundChoice;
             currentGameState.IsRoundEnding = false;
+
+            List<string>? options = null;
+            if (currentGameState.IsCurrentRoundChoice)
+            {
+                var wrongTranslations = await wordService.GetWrongTranslations(
+                    currentGameState.CurrentWordData.DictionaryWordId,
+                    currentGameState.DictionaryId,
+                    3);
+
+                options = [currentGameState.CurrentWordData.Translation, .. wrongTranslations];
+                var rng = Random.Shared;
+                for (var i = options.Count - 1; i > 0; i--)
+                {
+                    var j = rng.Next(i + 1);
+                    (options[i], options[j]) = (options[j], options[i]);
+                }
+
+                currentGameState.CurrentRoundOptions = options;
+                currentGameState.CurrentCorrectOptionIndex =
+                    options.IndexOf(currentGameState.CurrentWordData.Translation);
+            }
             
             currentGameState.CurrentJobId = await timerService.ScheduleEndRound(roomId);
             var endRoundTime = DateTime.UtcNow.AddSeconds(timingOptions.Value.RoundDurationSeconds);
@@ -49,7 +77,9 @@ public class Handler(
             await hubContext.Clients.Group(roomId).SendAsync("StartNewRound",
                 new Response(newWord,
                     currentRound,
-                    endRoundTime),
+                    endRoundTime,
+                    currentGameState.IsCurrentRoundChoice,
+                    options),
                 cancellationToken);
         });
         

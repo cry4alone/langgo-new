@@ -15,7 +15,10 @@ public record Response(
     Dictionary<int, int> Scores,
     DateTime NewRoundTime,
     string CorrectAnswer,
-    TimeSpan? ResponseTime);
+    TimeSpan? ResponseTime,
+    bool IsChoiceRound,
+    List<string>? Options,
+    int? CorrectOptionIndex);
 
 public class Handler(
     IRedisCache cache,
@@ -62,7 +65,10 @@ public class Handler(
                     scores,
                     newRoundTime,
                     correctAnswer,
-                    responseTime),
+                    responseTime,
+                    currentGameState.IsCurrentRoundChoice,
+                    currentGameState.CurrentRoundOptions.Count > 0 ? currentGameState.CurrentRoundOptions : null,
+                    currentGameState.CurrentRoundOptions.Count > 0 ? currentGameState.CurrentCorrectOptionIndex : null),
                 cancellationToken);
         });
     }

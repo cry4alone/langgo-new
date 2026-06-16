@@ -36,10 +36,24 @@ public class Handler(
                 return new Response(false, currentUserId);
             }
 
-            var isCorrect = string.Equals(
-                currentGameState.CurrentWordData.Translation,
-                request.Answer,
-                StringComparison.CurrentCultureIgnoreCase);
+            bool isCorrect;
+            if (currentGameState.IsCurrentRoundChoice)
+            {
+                if (!int.TryParse(request.Answer, out var selectedIndex) ||
+                    selectedIndex < 0 || selectedIndex >= currentGameState.CurrentRoundOptions.Count)
+                {
+                    return new Response(false, currentUserId);
+                }
+
+                isCorrect = selectedIndex == currentGameState.CurrentCorrectOptionIndex;
+            }
+            else
+            {
+                isCorrect = string.Equals(
+                    currentGameState.CurrentWordData.Translation,
+                    request.Answer,
+                    StringComparison.CurrentCultureIgnoreCase);
+            }
 
             if (isCorrect)
             {

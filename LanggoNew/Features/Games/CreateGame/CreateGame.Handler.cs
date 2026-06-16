@@ -39,6 +39,12 @@ public class Handler(
             request.MaxRounds,
             request.DictionaryId);
         
+        var totalWordsInDictionary = await context.DictionaryWords
+            .CountAsync(w => w.DictionaryId == request.DictionaryId, cancellationToken);
+        
+        if (totalWordsInDictionary < 4)
+            throw new NotEnoughWordsInDictionaryException(request.DictionaryId, 4);
+        
         if(words.Count < request.MaxRounds)
             throw new NotEnoughWordsInDictionaryException(request.DictionaryId, request.MaxRounds);
         

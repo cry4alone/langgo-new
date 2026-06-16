@@ -21,6 +21,10 @@ public class GameState
 
     public bool IsRoundEnding { get; set; }
 
+    public bool IsCurrentRoundChoice { get; set; }
+    public List<string> CurrentRoundOptions { get; set; } = [];
+    public int CurrentCorrectOptionIndex { get; set; }
+
     public int LastEndedRound { get; set; }
 
     public Stack<int> RoundWinners { get; set; } = new Stack<int>();
@@ -30,6 +34,7 @@ public class GameState
 
 public class WordData
 {
+    public int DictionaryWordId { get; set; }
     public string Original { get; set; } = string.Empty;
     public string Translation { get; set; } = string.Empty;
     public string Example { get; set; } = string.Empty;
