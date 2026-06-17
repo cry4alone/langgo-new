@@ -90,8 +90,8 @@ public class Handler(AppDbContext context, IAvatarStorageService avatarStorageSe
                 friend.Username,
                 friend.FullName,
                 avatarUrl,
-                Enum.Parse<LanguageCode>(friend.LearningLanguage, ignoreCase: true),
-                Enum.Parse<LanguageCode>(friend.NativeLanguage, ignoreCase: true));
+                Enum.Parse<LanguageCode>(friend.LearningLanguage, ignoreCase: false),
+                Enum.Parse<LanguageCode>(friend.NativeLanguage, ignoreCase: false));
         }));
 
         return result.ToList();
