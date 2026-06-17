@@ -19,11 +19,12 @@ public class Handler(
             .Where(f => f.FriendId == currentUserId && f.Status == FriendshipStatus.Pending)
             .Select(f => new
             {
-                FriendshipId = f.Id,
                 UserId = f.User.Id,
                 f.User.Username,
                 f.User.FullName,
-                f.User.Avatar
+                f.User.Avatar,
+                f.User.LearningLanguage,
+                f.User.NativeLanguage
             })
             .ToListAsync(cancellationToken);
 
@@ -36,11 +37,12 @@ public class Handler(
             }
 
             return new PendingRequestResponse(
-                r.FriendshipId,
                 r.UserId,
                 r.Username,
                 r.FullName,
-                avatarUrl);
+                avatarUrl,
+                r.LearningLanguage,
+                r.NativeLanguage);
         }));
 
         return result.ToList();
