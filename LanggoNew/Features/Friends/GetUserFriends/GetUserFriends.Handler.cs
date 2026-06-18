@@ -14,23 +14,23 @@ public sealed class UserProfile
     private readonly string _username;
     private readonly string _fullName;
     private readonly string? _avatarUrl;
-    private readonly LanguageCode _learningLanguage;
-    private readonly LanguageCode _nativeLanguage;
+    private readonly string _learningLanguage;
+    private readonly string _nativeLanguage;
 
     public int Id => _id;
     public string Username => _username;
     public string FullName => _fullName;
     public string? AvatarUrl => _avatarUrl;
-    public LanguageCode LearningLanguage => _learningLanguage;
-    public LanguageCode NativeLanguage => _nativeLanguage;
+    public string LearningLanguage => _learningLanguage;
+    public string NativeLanguage => _nativeLanguage;
 
     public UserProfile(
         int id,
         string username,
         string fullName,
         string? avatarUrl,
-        LanguageCode learningLanguage,
-        LanguageCode nativeLanguage)
+        string learningLanguage,
+        string nativeLanguage)
     {
         _id = id;
         _username = username;
@@ -90,8 +90,8 @@ public class Handler(AppDbContext context, IAvatarStorageService avatarStorageSe
                 friend.Username,
                 friend.FullName,
                 avatarUrl,
-                Enum.Parse<LanguageCode>(friend.LearningLanguage, ignoreCase: false),
-                Enum.Parse<LanguageCode>(friend.NativeLanguage, ignoreCase: false));
+                friend.LearningLanguage,
+                friend.NativeLanguage);
         }));
 
         return result.ToList();
