@@ -53,7 +53,7 @@ builder.Services.AddEndpoints();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Demo")
 {
     app.UseSwagger();
     app.UseSwaggerUI();

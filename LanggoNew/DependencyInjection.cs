@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 using Hangfire;
 using Hangfire.Redis.StackExchange;
@@ -165,9 +167,25 @@ public static class DependencyInjection
 
     public static IServiceCollection AddEmailSmtp(this IServiceCollection services, IConfiguration configuration)
     {
+        var host = configuration["EmailSettings:Host"]!;
+        var port = configuration.GetValue<int>("EmailSettings:Port");
+        var username = configuration["EmailSettings:Username"];
+        var password = configuration["EmailSettings:Password"];
+
         services.AddFluentEmail(configuration["EmailSettings:EmailSender"], configuration["EmailSettings:EmailSenderName"])
-            .AddSmtpSender(configuration["EmailSettings:Host"], configuration.GetValue<int>("EmailSettings:Port"));
-        
+            .AddSmtpSender(() =>
+            {
+                var client = new SmtpClient(host, port)
+                {
+                    EnableSsl = true,
+                };
+
+                if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+                    client.Credentials = new NetworkCredential(username, password);
+
+                return client;
+            });
+
         return services;
     }
 }

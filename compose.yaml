@@ -1,4 +1,4 @@
-﻿services:
+services:
   langgonew:
     image: langgonew
     build:
@@ -6,6 +6,8 @@
       dockerfile: LanggoNew/Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Demo
     env_file:
       - ./LanggoNew/.env
   postgres:
