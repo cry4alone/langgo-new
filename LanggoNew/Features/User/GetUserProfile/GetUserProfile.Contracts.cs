@@ -10,5 +10,6 @@ public record Response(
     string Avatar,
     string LearningLanguage,
     string NativeLanguage,
-    int Rating); 
+    int Rating,
+    bool IsEmailVerified); 
 public record Request(int UserId) : IRequest<Response>;

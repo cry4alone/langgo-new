@@ -15,7 +15,8 @@ public class UserProfile : Profile
                 src.Avatar,
                 src.LearningLanguage,
                 src.NativeLanguage,
-                src.Rating
+                src.Rating,
+                src.IsEmailVerified
             ));
     }
 }
